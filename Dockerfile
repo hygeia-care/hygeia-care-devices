@@ -1,6 +1,7 @@
 FROM node:20-alpine
 
 ENV DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
+ENV MD_APP_PORT=3001
 
 WORKDIR /app
 
@@ -15,6 +16,6 @@ COPY routes/ ./routes
 COPY services/ ./services
 COPY models/ ./models
 COPY app.js .
-EXPOSE 3000
+EXPOSE $MD_APP_PORT
 
 CMD npm start
