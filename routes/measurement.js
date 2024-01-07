@@ -15,11 +15,11 @@ const MeasurementType = {
 router.get('/', async function (req, res, next) {
     try {
         const result = await Measurement.find();
-        res.send(result);
-    } catch (e) {
+        res.send(result.map((c) => c.cleanup()));
+      } catch (e) {
         debug("DB problem", e);
         res.sendStatus(500);
-    }
+      }
 });
 
 /* GET measurement/id */
@@ -39,24 +39,27 @@ router.get('/:id', async function (req, res, next) {
 
 /* POST measurement */
 router.post('/', async function (req, res, next) {
-    const { title, comment, type, user } = req.body;
+    const { title, date, comment, type, user } = req.body;
 
-    // TODO change this to a user defined date.
-    // -> this isn't working rn anyway...
-    creationDate = new Date();
     const measurement = new Measurement({
-        title, creationDate, comment, type, user
+        title, date, comment, type, user
     });
 
     try {
         await measurement.save();
         return res.sendStatus(201);
     } catch (e) {
-        debug("DB problem", e);
-        res.sendStatus(500)
+        if (e.errors) {
+            debug("Validation prblem when saving");
+            res.status(400).send({ error: e.message });
+        } else {
+            debug("DB problem", e);
+            res.sendStatus(500)
+        }
     }
 
 });
+
 
 /* PATCH measurement/:id */
 
