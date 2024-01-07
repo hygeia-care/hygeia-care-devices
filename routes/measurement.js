@@ -10,16 +10,15 @@ const MeasurementType = {
     VO2: Symbol("VO2")
 }
 
-
 /* GET measurements listing. */
 router.get('/', async function (req, res, next) {
     try {
         const result = await Measurement.find();
         res.send(result.map((c) => c.cleanup()));
-      } catch (e) {
+    } catch (e) {
         debug("DB problem", e);
         res.sendStatus(500);
-      }
+    }
 });
 
 /* GET measurement/id */
@@ -60,8 +59,50 @@ router.post('/', async function (req, res, next) {
 
 });
 
-
 /* PATCH measurement/:id */
+router.patch('/:id', async function (req, res, next) {
+    var id = req.params.id;
+    const { title, date, comment, type, user } = req.body;
 
+    const updatesDict = {};
+
+    if (title !== null && title !== undefined) {
+      updatesDict.title = title;
+    }
+    
+    if (date !== null && date !== undefined) {
+      updatesDict.date = date;
+    }
+    
+    if (comment !== null && comment !== undefined) {
+      updatesDict.comment = comment;
+    }
+    
+    if (type !== null && type !== undefined) {
+      updatesDict.type = type;
+    }
+    
+    if (user !== null && user !== undefined) {
+      updatesDict.user = user;
+    }
+    
+    const update = {
+        $set: updatesDict
+      };
+
+    try {
+        const result = await Measurement.updateOne({ _id: id }, update);
+        if (!result.acknowledged) {
+            debug("DB problem with measurement update - not acknowledged");
+            res.sendStatus(500);
+        } else {
+            const result = await Measurement.find({ _id: id });
+            res.send(result[0].cleanup());
+        }
+    } catch (e) {
+        debug("DB problem", e);
+        res.sendStatus(500);
+    }
+});
 
 module.exports = router;

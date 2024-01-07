@@ -1,32 +1,50 @@
 var express = require('express');
 var router = express.Router();
-var Analysis = require('../models/analysis')
-// This might not work... 7:07 in step 2
-var debug = require('debug')('analysis-2:server')
+var Analysis = require('../models/analysis');
+var Measurement = require('../models/measurement');
+var debug = require('debug')('analysis-2:server');
 
-// TODO 
 /* GET analyses listing. */
-router.get('/', async function (req, res, next) {
+// router.get('/', async function (req, res, next) {
+//   try {
+//     const result = await Analysis.find();
+//     res.send(result.map((c) => c.cleanup()));
+//   } catch (e) {
+//     debug("DB problem", e);
+//     res.sendStatus(500);
+//   }
+// });
+
+/* GET analysis/:id */
+router.get('/:id', async function (req, res, next) {
+  var id = req.params.id;
   try {
-    const result = await Analysis.find();
-    res.send(result.map((c) => c.cleanup()));
+    const result = await Analysis.find({ _id: id });
+    res.send(result[0].cleanup());
   } catch (e) {
     debug("DB problem", e);
     res.sendStatus(500);
   }
 });
 
-/* GET analysis/:id */
-router.get('/:id', async function (req, res, next) {
+/* DELETE analysis*/
+router.delete('/:id', async function (req, res, next) {
   var id = req.params.id;
-  // TODO placeholder, implement db fetch
-  result = { "id": "hashId" + id, "value": 123, "measurement": "todo - id maybe? Or relationship" }
-  res.send(result);
+  try {
+    const result = await Analysis.deleteOne({ _id: id });
+    if (!result.acknowledged) {
+      debug("DB problem", e);
+      res.sendStatus(500);
+    } else if (result.deletedCount != 1) {
+      res.status(404).send({ error: "Analysis object with id " + id + " not found" });
+    }
+    res.sendStatus(200);
+  } catch (e) {
+    debug("DB problem", e);
+    res.sendStatus(500);
+  }
 });
 
-/* GET analysis?user=:id */
-
-/* DELETE analysis*/
 
 /* POST */
 router.post('/', async function (req, res, next) {
@@ -51,5 +69,58 @@ router.post('/', async function (req, res, next) {
   }
 
 });
+
+
+// Define a route to find Analysis objects based on userId query parameter
+router.get('/', async (req, res) => {
+  try {
+    const userId = req.query.userId;
+
+    if (!userId) {
+      // Without userId return all analyses
+      try {
+        const result = await Analysis.find();
+        res.send(result.map((c) => c.cleanup()));
+        return;
+      } catch (e) {
+        debug("DB problem", e);
+        res.sendStatus(500);
+        return;
+      }
+    }
+
+    // Specify the filter to find the documents with the given userId
+    var filter = { user: userId };
+
+    // Use find to retrieve the documents that match the filter
+    const measurementObjects = await Measurement.find(filter);
+
+    if (measurementObjects.length == 0) {
+      res.status(404).json({ message: 'No analyses found for the given userId' });
+      return;
+    }
+
+    const measurementIds = []
+
+    for (index in measurementObjects) {
+      measurementIds.push(String(measurementObjects[index]._id))
+    }
+
+    filter = { measurement: { $in: measurementIds } };
+
+    // Use find to retrieve the documents that match the filter
+    const analysisObjects = await Analysis.find(filter)
+
+    if (analysisObjects.length == 0) {
+      res.status(404).json({ message: 'No analyses found for the given userId' });
+    } else {
+      res.send(analysisObjects.map((c) => c.cleanup()));
+    }
+  } catch (error) {
+    console.error('Error finding Analyses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;
