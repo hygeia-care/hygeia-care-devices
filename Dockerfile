@@ -1,4 +1,6 @@
-FROM node:13-alpine
+FROM node:20-alpine
+
+ENV DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
 
 WORKDIR /app
 
@@ -11,6 +13,7 @@ COPY bin/ ./bin
 COPY public/ ./public
 COPY routes/ ./routes
 COPY services/ ./services
+COPY models/ ./models
 COPY app.js .
 EXPOSE 3000
 
