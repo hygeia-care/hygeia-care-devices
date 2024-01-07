@@ -20,7 +20,10 @@ router.get('/:id', async function (req, res, next) {
   var id = req.params.id;
   try {
     const result = await Analysis.find({ _id: id });
-    res.send(result[0].cleanup());
+    if (result.length == 0) {
+      res.status(404).json({ message: 'No analyses found with the given id' });
+      return;
+    }    res.send(result[0].cleanup());
   } catch (e) {
     debug("DB problem", e);
     res.sendStatus(500);
