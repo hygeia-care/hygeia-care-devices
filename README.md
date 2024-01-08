@@ -6,6 +6,8 @@ This repo contains the code for running the microservice for medical devices in 
 
 A docker image can be built from the exisitng docker file. Running the resulting image will run the medical devices on the port defined in the Dockerfile. 
 
+The value for the environment variable must be set (see GOOGLE_HEALTHCARE_API_AUTH in the Dockerfile). Contact Danielle McKenney for this API key. 
+
 This can be achieved in Visual Studio Code, or by running the following commands from the directory of the project:
 
 ```bash
@@ -25,13 +27,18 @@ npm start
 This will attempt a connection to a local database. To reach the mongodb database, define the environment variable
 
 ```bash
-DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
+export DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
+```
+The following API key must also be defined; contact Danielle McKenney for its value.
+
+```bash
+export GOOGLE_HEALTHCARE_API_AUTH=<contact Danielle for secret>
 ```
 
 Optionally, the port to run the app on can be defined with the following environment variable:
 
 ```bash
-MD_APP_PORT=3001
+export MD_APP_PORT=3001
 ```
 
 ## Usage

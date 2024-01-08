@@ -2,6 +2,7 @@ FROM node:20-alpine
 
 ENV DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
 ENV MD_APP_PORT=3001
+# ENV GOOGLE_HEALTHCARE_API_AUTH=<fill in>
 
 WORKDIR /app
 

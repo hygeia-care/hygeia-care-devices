@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var Measurement = require('../models/measurement')
 var debug = require('debug')('analysis-2:server')
+var axios = require('axios');
+
 
 const MeasurementType = {
     BloodPressure: Symbol("bloodPressure"),
@@ -59,6 +61,46 @@ router.post('/', async function (req, res, next) {
 
 });
 
+
+/* POST measurement using Google Healthcare API Integration */
+router.post('/exportStandardized/:measurementId', async function (req, res, next) {
+    var measurementId = req.params.measurementId;
+    try {
+        const result = await Measurement.find({ _id: measurementId });
+        if (result.length == 0) {
+            res.status(404).json({ message: 'No measurement found with the given id' });
+            return;
+        }
+
+        console.log("Attempting communication with google Healthcare API");
+
+        // Access the Google Healthcare API Auth token from the environment variable
+        const authToken = process.env.GOOGLE_HEALTHCARE_API_AUTH;
+
+        // Request the standardized version of the measurement
+        const response = await axios.post('https://healthcare.googleapis.com/v1/projects/formidable-era-410617/locations/europe-west4/services/nlp:analyzeEntities', {
+            documentContent: result[0].comment
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Return standardized format
+        res.status(201).json(response.data);
+    } catch (e) {
+        if (e.errors) {
+            debug("Validation prblem when saving");
+            res.status(400).send({ error: e.message });
+        } else {
+            debug("DB problem", e);
+            res.sendStatus(500)
+        }
+    }
+
+});
+
 /* PATCH measurement/:id */
 router.patch('/:id', async function (req, res, next) {
     var id = req.params.id;
@@ -67,28 +109,28 @@ router.patch('/:id', async function (req, res, next) {
     const updatesDict = {};
 
     if (title !== null && title !== undefined) {
-      updatesDict.title = title;
+        updatesDict.title = title;
     }
-    
+
     if (date !== null && date !== undefined) {
-      updatesDict.date = date;
+        updatesDict.date = date;
     }
-    
+
     if (comment !== null && comment !== undefined) {
-      updatesDict.comment = comment;
+        updatesDict.comment = comment;
     }
-    
+
     if (type !== null && type !== undefined) {
-      updatesDict.type = type;
+        updatesDict.type = type;
     }
-    
+
     if (user !== null && user !== undefined) {
-      updatesDict.user = user;
+        updatesDict.user = user;
     }
-    
+
     const update = {
         $set: updatesDict
-      };
+    };
 
     try {
         const result = await Measurement.updateOne({ _id: id }, update);

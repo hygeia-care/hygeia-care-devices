@@ -4,6 +4,7 @@ var Analysis = require('../models/analysis');
 var Measurement = require('../models/measurement');
 var debug = require('debug')('analysis-2:server');
 
+
 /* GET analyses listing. */
 // router.get('/', async function (req, res, next) {
 //   try {
@@ -23,7 +24,8 @@ router.get('/:id', async function (req, res, next) {
     if (result.length == 0) {
       res.status(404).json({ message: 'No analyses found with the given id' });
       return;
-    }    res.send(result[0].cleanup());
+    }
+    res.send(result[0].cleanup());
   } catch (e) {
     debug("DB problem", e);
     res.sendStatus(500);
