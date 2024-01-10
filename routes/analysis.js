@@ -3,21 +3,17 @@ var router = express.Router();
 var Analysis = require('../models/analysis');
 var Measurement = require('../models/measurement');
 var debug = require('debug')('analysis-2:server');
-
-
-/* GET analyses listing. */
-// router.get('/', async function (req, res, next) {
-//   try {
-//     const result = await Analysis.find();
-//     res.send(result.map((c) => c.cleanup()));
-//   } catch (e) {
-//     debug("DB problem", e);
-//     res.sendStatus(500);
-//   }
-// });
+var verifyToken = require('../verifyJWTToken');
 
 /* GET analysis/:id */
 router.get('/:id', async function (req, res, next) {
+
+  try {
+    verifyToken(req.headers['x-auth-token']);
+  } catch (e) {
+    return;
+  }
+
   var id = req.params.id;
   try {
     const result = await Analysis.find({ _id: id });
@@ -34,6 +30,13 @@ router.get('/:id', async function (req, res, next) {
 
 /* DELETE analysis*/
 router.delete('/:id', async function (req, res, next) {
+
+  try {
+    verifyToken(req.headers['x-auth-token']);
+  } catch (e) {
+    return;
+  }
+
   var id = req.params.id;
   try {
     const result = await Analysis.deleteOne({ _id: id });
@@ -53,6 +56,13 @@ router.delete('/:id', async function (req, res, next) {
 
 /* POST */
 router.post('/', async function (req, res, next) {
+
+  try {
+    verifyToken(req.headers['x-auth-token']);
+  } catch (e) {
+    return;
+  }
+
   const { value, measurement } = req.body;
 
   const analysis = new Analysis({
@@ -78,6 +88,13 @@ router.post('/', async function (req, res, next) {
 
 // Define a route to find Analysis objects based on userId query parameter
 router.get('/', async (req, res) => {
+
+  try {
+    verifyToken(req.headers['x-auth-token']);
+  } catch (e) {
+    return;
+  }
+
   try {
     const userId = req.query.userId;
 
@@ -126,6 +143,5 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 module.exports = router;

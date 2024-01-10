@@ -3,7 +3,7 @@ var router = express.Router();
 var Measurement = require('../models/measurement')
 var debug = require('debug')('analysis-2:server')
 var axios = require('axios');
-
+var verifyToken = require('../verifyJWTToken');
 
 const MeasurementType = {
     BloodPressure: Symbol("bloodPressure"),
@@ -15,6 +15,12 @@ const MeasurementType = {
 /* GET measurements listing. */
 router.get('/', async function (req, res, next) {
     try {
+        verifyToken(req.headers['x-auth-token']);
+    } catch (e) {
+        return;
+    }
+
+    try {
         const result = await Measurement.find();
         res.send(result.map((c) => c.cleanup()));
     } catch (e) {
@@ -25,6 +31,13 @@ router.get('/', async function (req, res, next) {
 
 /* GET measurement/id */
 router.get('/:id', async function (req, res, next) {
+
+    try {
+        verifyToken(req.headers['x-auth-token']);
+    } catch (e) {
+        return;
+    }
+
     var id = req.params.id;
     // TODO placeholder, implement db fetch
     result = {
@@ -40,6 +53,13 @@ router.get('/:id', async function (req, res, next) {
 
 /* POST measurement */
 router.post('/', async function (req, res, next) {
+
+    try {
+        verifyToken(req.headers['x-auth-token']);
+    } catch (e) {
+        return;
+    }
+
     const { title, date, comment, type, user } = req.body;
 
     const measurement = new Measurement({
@@ -64,6 +84,13 @@ router.post('/', async function (req, res, next) {
 
 /* POST measurement using Google Healthcare API Integration */
 router.post('/exportStandardized/:measurementId', async function (req, res, next) {
+
+    try {
+        verifyToken(req.headers['x-auth-token']);
+    } catch (e) {
+        return;
+    }
+
     var measurementId = req.params.measurementId;
     try {
         const result = await Measurement.find({ _id: measurementId });
@@ -72,8 +99,7 @@ router.post('/exportStandardized/:measurementId', async function (req, res, next
             return;
         }
 
-        console.log("Attempting communication with google Healthcare API");
-
+       try { console.log("Attempting communication with google Healthcare API");
         // Access the Google Healthcare API Auth token from the environment variable
         const authToken = process.env.GOOGLE_HEALTHCARE_API_AUTH;
 
@@ -88,7 +114,12 @@ router.post('/exportStandardized/:measurementId', async function (req, res, next
         });
 
         // Return standardized format
-        res.status(201).json(response.data);
+        res.status(201).json(response.data);}
+        catch(e){
+            debug("Error communicating with google healthcare API", e);
+            res.status(500).send({error: "Error communicating with google healthcare API: "+e.message});
+            return;
+        }
     } catch (e) {
         if (e.errors) {
             debug("Validation prblem when saving");
@@ -103,6 +134,12 @@ router.post('/exportStandardized/:measurementId', async function (req, res, next
 
 /* PATCH measurement/:id */
 router.patch('/:id', async function (req, res, next) {
+    try {
+        verifyToken(req.headers['x-auth-token']);
+    } catch (e) {
+        return;
+    }
+
     var id = req.params.id;
     const { title, date, comment, type, user } = req.body;
 
