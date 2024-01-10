@@ -19,7 +19,7 @@ docker run -p <replace with MD_APP_PORT value>:<replace with MD_APP_PORT value> 
 
 ## Running Locally
 
-The app can be started by running the following command and will run on port 3000 my default:
+The app can be started by running the following command and will run on port 3334 by default:
 
 ```bash
 npm start
@@ -35,10 +35,10 @@ The following API key must also be defined; contact Danielle McKenney for its va
 export GOOGLE_HEALTHCARE_API_AUTH=<contact Danielle for secret>
 ```
 
-Optionally, the port to run the app on can be defined with the following environment variable:
+Optionally, the port to run the app on can be defined with the following environment variabl (default is 3334):
 
 ```bash
-export MD_APP_PORT=3001
+export MD_APP_PORT=3334
 ```
 
 ## Usage
@@ -47,9 +47,9 @@ The app supports two resources, "analysis" and "measurements". See below for exa
 
 ```bash
 # get all analysis
-curl --location 'http://localhost:3001/api/v1/analysis'
+curl --location 'http://localhost:3000/api/v1/analysis'
 # get specific analysis by id
-curl --location 'http://localhost:5000/api/v1/analysis/<id>'
+curl --location 'http://localhost:3000/api/v1/analysis/<id>'
 # filtered get analysis
 curl --location 'http://localhost:3000/api/v1/analysis?userId=xxx'
 # delete analysis
