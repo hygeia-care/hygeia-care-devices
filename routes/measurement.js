@@ -39,16 +39,17 @@ router.get('/:id', async function (req, res, next) {
     }
 
     var id = req.params.id;
-    // TODO placeholder, implement db fetch
-    result = {
-        "id": "hashId" + id,
-        "title": "bloodPressure Device3",
-        "date": new Date(),
-        "comment": "Doctor's comments",
-        "type": MeasurementType.BloodPressure,
-        "user": "todo - id or relationship"
+    try {
+        const result = await Measurement.find({ _id: id });
+        if (result.length == 0) {
+            res.status(404).json({ message: 'No measurement found with the given id: ' + id });
+            return;
+        }
+        res.send(result[0].cleanup());
+    } catch (e) {
+        debug("DB problem", e);
+        res.sendStatus(500);
     }
-    res.send(result);
 });
 
 /* POST measurement */
