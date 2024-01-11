@@ -53,9 +53,9 @@ router.get('/:id', async function (req, res, next) {
 
 /* POST measurement */
 router.post('/', async function (req, res, next) {
-
+    token = req.headers['x-auth-token']
     try {
-        await verifyToken(req.headers['x-auth-token'], res);
+        await verifyToken(token, res);
     } catch (e) {
         return;
     }
@@ -63,21 +63,22 @@ router.post('/', async function (req, res, next) {
     const { title, date, comment, type, user } = req.body;
 
     try {
-        // TODO verify that this user exists.
-        // const authToken = process.end.USER_SERVICE_API_KEY;
-        // userServiceURL = process.env.USER_SERVICE_URL
-        //   const response = await axios.get(userServiceURL+"users/"+user, {
-        //      {
-        //     headers: {
-        //         'Authorization': `Bearer ${authToken}`,
-        //         'Content-Type': 'application/json'
-        //     }
-        // });
+        // Verify that this user exists.
+        const authToken = process.env.USER_SERVICE_API_KEY;
+        userServiceURL = process.env.USER_SERVICE_URL
+        response = await axios.get(userServiceURL + "users/" + user,
+            {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
     } catch (e) {
         if (e.errors) {
-            res.status(404).send({ error: "No user found with id " + user });
+            res.status(404).send({ error: "Measurement not created because no user was found with id " + user });
         } else {
-            res.status(500).send({ error: "Unable to verify user, measurement not created. " + e.message });
+            res.status(500).send({ error: "Unable to verify user, measurement not created: " + e.message });
         }
         return;
     }
