@@ -15,7 +15,7 @@ const MeasurementType = {
 /* GET measurements listing. */
 router.get('/', async function (req, res, next) {
     try {
-        verifyToken(req.headers['x-auth-token']);
+        await verifyToken(req.headers['x-auth-token'], res);
     } catch (e) {
         return;
     }
@@ -33,7 +33,7 @@ router.get('/', async function (req, res, next) {
 router.get('/:id', async function (req, res, next) {
 
     try {
-        verifyToken(req.headers['x-auth-token']);
+        await verifyToken(req.headers['x-auth-token'], res);
     } catch (e) {
         return;
     }
@@ -55,12 +55,32 @@ router.get('/:id', async function (req, res, next) {
 router.post('/', async function (req, res, next) {
 
     try {
-        verifyToken(req.headers['x-auth-token']);
+        await verifyToken(req.headers['x-auth-token'], res);
     } catch (e) {
         return;
     }
 
     const { title, date, comment, type, user } = req.body;
+
+    try {
+        // TODO verify that this user exists.
+        // const authToken = process.end.USER_SERVICE_API_KEY;
+        // userServiceURL = process.env.USER_SERVICE_URL
+        //   const response = await axios.get(userServiceURL+"users/"+user, {
+        //      {
+        //     headers: {
+        //         'Authorization': `Bearer ${authToken}`,
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+    } catch (e) {
+        if (e.errors) {
+            res.status(404).send({ error: "No user found with id " + user });
+        } else {
+            res.status(500).send({ error: "Unable to verify user, measurement not created. " + e.message });
+        }
+        return;
+    }
 
     const measurement = new Measurement({
         title, date, comment, type, user
@@ -86,7 +106,7 @@ router.post('/', async function (req, res, next) {
 router.post('/exportStandardized/:measurementId', async function (req, res, next) {
 
     try {
-        verifyToken(req.headers['x-auth-token']);
+        await verifyToken(req.headers['x-auth-token'], res);
     } catch (e) {
         return;
     }
@@ -99,25 +119,27 @@ router.post('/exportStandardized/:measurementId', async function (req, res, next
             return;
         }
 
-       try { console.log("Attempting communication with google Healthcare API");
-        // Access the Google Healthcare API Auth token from the environment variable
-        const authToken = process.env.GOOGLE_HEALTHCARE_API_AUTH;
+        try {
+            console.log("Attempting communication with google Healthcare API");
+            // Access the Google Healthcare API Auth token from the environment variable
+            const authToken = process.env.GOOGLE_HEALTHCARE_API_AUTH;
 
-        // Request the standardized version of the measurement
-        const response = await axios.post('https://healthcare.googleapis.com/v1/projects/formidable-era-410617/locations/europe-west4/services/nlp:analyzeEntities', {
-            documentContent: result[0].comment
-        }, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            }
-        });
+            // Request the standardized version of the measurement
+            const response = await axios.post('https://healthcare.googleapis.com/v1/projects/formidable-era-410617/locations/europe-west4/services/nlp:analyzeEntities', {
+                documentContent: result[0].comment
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        // Return standardized format
-        res.status(201).json(response.data);}
-        catch(e){
+            // Return standardized format
+            res.status(201).json(response.data);
+        }
+        catch (e) {
             debug("Error communicating with google healthcare API", e);
-            res.status(500).send({error: "Error communicating with google healthcare API: "+e.message});
+            res.status(500).send({ error: "Error communicating with google healthcare API: " + e.message });
             return;
         }
     } catch (e) {
@@ -135,7 +157,7 @@ router.post('/exportStandardized/:measurementId', async function (req, res, next
 /* PATCH measurement/:id */
 router.patch('/:id', async function (req, res, next) {
     try {
-        verifyToken(req.headers['x-auth-token']);
+        await verifyToken(req.headers['x-auth-token'], res);
     } catch (e) {
         return;
     }

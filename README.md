@@ -41,15 +41,32 @@ Optionally, the port to run the app on can be defined with the following environ
 export MD_APP_PORT=3334
 ```
 
+Also define the variables for connecting to the user service:
+```bash
+export USER_SERVICE_URL="http://localhost:3333/api/v1/auth/"
+export USER_SERVICE_API_KEY="04f9237d-646e-4e0d-90d2-504b1f7dcbc0"
+```
+
+All together:
+```bash
+export DB_URL="mongodb+srv://medDevService:lHFPV6sI94nny2cD@medicaldevicescluster.h2blqct.mongodb.net/?retryWrites=true&w=majority"
+export GOOGLE_HEALTHCARE_API_AUTH=<contact Danielle for secret>
+export MD_APP_PORT=3334
+export USER_SERVICE_URL="http://localhost:3333/api/v1/auth/"
+export USER_SERVICE_API_KEY="04f9237d-646e-4e0d-90d2-504b1f7dcbc0"
+```
+
 ## Usage
 
-The app supports two resources, "analysis" and "measurements". See below for examples of the supported requests:
+The app supports two resources, "analysis" and "measurements". See below for examples of the supported requests. All requests require a valid api key and token as demonstrated in the first example:
 
 ```bash
+# get specific analysis by id
+curl --location 'http://localhost:3334/api/v1/analysis/<id>' \
+--header 'x-auth-token: <valid_token>' \
+--header 'Authorization: Bearer <API_key>'
 # get all analysis
 curl --location 'http://localhost:3000/api/v1/analysis'
-# get specific analysis by id
-curl --location 'http://localhost:3000/api/v1/analysis/<id>'
 # filtered get analysis
 curl --location 'http://localhost:3000/api/v1/analysis?userId=xxx'
 # delete analysis

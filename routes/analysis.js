@@ -9,7 +9,7 @@ var verifyToken = require('../verifyJWTToken');
 router.get('/:id', async function (req, res, next) {
 
   try {
-    verifyToken(req.headers['x-auth-token']);
+    await verifyToken(req.headers['x-auth-token'], res);
   } catch (e) {
     return;
   }
@@ -32,7 +32,7 @@ router.get('/:id', async function (req, res, next) {
 router.delete('/:id', async function (req, res, next) {
 
   try {
-    verifyToken(req.headers['x-auth-token']);
+    await verifyToken(req.headers['x-auth-token'], res);
   } catch (e) {
     return;
   }
@@ -58,7 +58,7 @@ router.delete('/:id', async function (req, res, next) {
 router.post('/', async function (req, res, next) {
 
   try {
-    verifyToken(req.headers['x-auth-token']);
+    await verifyToken(req.headers['x-auth-token'], res);
   } catch (e) {
     return;
   }
@@ -90,7 +90,7 @@ router.post('/', async function (req, res, next) {
 router.get('/', async (req, res) => {
 
   try {
-    verifyToken(req.headers['x-auth-token']);
+    await verifyToken(req.headers['x-auth-token'], res);
   } catch (e) {
     return;
   }
