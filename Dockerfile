@@ -19,6 +19,7 @@ COPY routes/ ./routes
 COPY services/ ./services
 COPY models/ ./models
 COPY app.js .
+COPY verifyJWTToken.js .
 EXPOSE $MD_APP_PORT
 
 CMD npm start
