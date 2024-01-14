@@ -9,6 +9,9 @@ var measurementRouter = require('./routes/measurement');
 
 var app = express();
 
+const cors = require('cors'); // importamos CORS
+app.use(cors()); // Aplicamos CORS a todas las rutas
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
