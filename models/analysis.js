@@ -19,6 +19,6 @@ analysisSchema.methods.cleanup = function() {
     }
 }
 
-const Anaysis = mongoose.model('Analysis', analysisSchema);
+const Analysis = mongoose.model('Analysis', analysisSchema);
 
-module.exports = Anaysis;
+module.exports = Analysis;
