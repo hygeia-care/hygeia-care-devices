@@ -2,6 +2,8 @@ const app = require('../app');
 const request = require('supertest');
 const Analysis = require('../models/analysis');
 const verifyToken = require('../verifyJWTToken');
+const mongoose = require('mongoose');
+
 
 jest.mock('../verifyJWTToken'); // Mock the entire module
 
@@ -14,6 +16,11 @@ describe("analysis API", () => {
             dbFind = jest.spyOn(Analysis, "find");
             // Reset the mock before each test
             verifyToken.mockReset();
+        });
+
+        afterAll(async () => {
+            // Close MongoDB connection after all tests
+            await mongoose.connection.close();
         });
 
         it("Should return all analysis", () => {
