@@ -1,6 +1,9 @@
 const app = require('../app');
 const request = require('supertest');
 const Analysis = require('../models/analysis');
+const verifyToken = require('../verifyJWTToken');
+
+jest.mock('../verifyJWTToken'); // Mock the entire module
 
 describe("analysis API", () => {
     describe("GET /analysis/:id", () => {
@@ -9,20 +12,20 @@ describe("analysis API", () => {
 
         beforeEach(() => {
             dbFind = jest.spyOn(Analysis, "find");
-            authorization = jest.spyOn(verifyJWTToken, "veryfyToken");
+            // Reset the mock before each test
+            verifyToken.mockReset();
         });
 
         it("Should return all analysis", () => {
             dbFind.mockImplementation(async () => Promise.resolve(analysis));
-            authorization.mockImplementation(async () => Promise.resolve(null));
+            verifyToken.mockImplementation(async () => Promise.resolve(null));
 
             return request(app).get("/api/v1/Analysis").then((response) => {
                 expect(response.statusCode).toBe(200);
-                expect(response.body.value).toEqual("Testanalysis");
+                expect(response.body[0].value).toEqual("Testanalysis");
                 expect(dbFind).toBeCalled();
-                expect(authorization).toBeCalled();
+                expect(verifyToken).toBeCalled();
             });
         });
     });
 });
-
