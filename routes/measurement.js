@@ -4,6 +4,7 @@ var Measurement = require('../models/measurement')
 var debug = require('debug')('analysis-2:server')
 var axios = require('axios');
 var verifyToken = require('../verifyJWTToken');
+require('dotenv').config();
 
 const MeasurementType = {
     BloodPressure: Symbol("bloodPressure"),
