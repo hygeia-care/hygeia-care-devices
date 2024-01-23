@@ -40,13 +40,14 @@ router.delete('/:id', async function (req, res, next) {
   var id = req.params.id;
   try {
     const result = await Analysis.deleteOne({ _id: id });
-    if (!result.acknowledged) {
+    if (result.deletedCount != 1) {
+      res.status(404).send({ error: "Analysis object with id " + id + " not found" });
+    } else if (!result.acknowledged) {
       debug("DB problem", e);
       res.sendStatus(500);
-    } else if (result.deletedCount != 1) {
-      res.status(404).send({ error: "Analysis object with id " + id + " not found" });
+    } else {
+      res.sendStatus(200);
     }
-    res.sendStatus(200);
   } catch (e) {
     debug("DB problem", e);
     res.sendStatus(500);

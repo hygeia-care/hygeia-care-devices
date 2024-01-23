@@ -2,6 +2,7 @@ const app = require('../app');
 const request = require('supertest');
 const Analysis = require('../models/analysis');
 const verifyToken = require('../verifyJWTToken');
+const Measurement = require('../models/measurement');
 
 jest.mock('../verifyJWTToken');
 
@@ -107,28 +108,28 @@ describe("analysis API", () => {
                 // Simulate a validation error by throwing an error with 'errors' property
                 throw { errors: { someField: { message: 'Validation error' } } };
             });
-    
+
             verifyToken.mockImplementation(async () => Promise.resolve(null));
-    
+
             const response = await request(app)
                 .post("/api/v1/Analysis")
                 .set('x-auth-token', 'some-token')
                 .send({
                     // Missing required fields to trigger validation error
                 });
-    
+
             expect(response.statusCode).toBe(400);
             expect(saveMock).toBeCalled();
             expect(verifyToken).toBeCalledWith('some-token', expect.anything());
         });
-    
+
         it("Should return 500 on database error", async () => {
             const saveMock = jest.spyOn(Analysis.prototype, "save").mockImplementation(async () => {
                 throw new Error("Database error");
             });
-    
+
             verifyToken.mockImplementation(async () => Promise.resolve(null));
-    
+
             const response = await request(app)
                 .post("/api/v1/Analysis")
                 .set('x-auth-token', 'some-token')
@@ -136,7 +137,7 @@ describe("analysis API", () => {
                     value: "NewAnalysis",
                     measurement: "meas123"
                 });
-    
+
             expect(response.statusCode).toBe(500);
             expect(saveMock).toBeCalled();
             expect(verifyToken).toBeCalledWith('some-token', expect.anything());
@@ -147,7 +148,11 @@ describe("analysis API", () => {
         it("Should return all analyses for a given userId", async () => {
             const findMock = jest.spyOn(Analysis, "find").mockImplementation(async () => [
                 new Analysis({ value: "Analysis1", measurement: "meas1" }),
-                new Analysis({ value: "Analysis2", measurement: "meas2" })
+                new Analysis({ value: "Analysis2", measurement: "meas1" })
+            ]);
+
+            const findMeasurement = jest.spyOn(Measurement, "find").mockImplementation(async () => [
+                new Measurement({ "id": "meas1", "title": "myTitle", "date": "01/01/01", "comment": "fdsfdsf", "type": "https://www.testassurance.com", "user": "some-user-id" }),
             ]);
 
             verifyToken.mockImplementation(async () => Promise.resolve(null));
@@ -158,10 +163,46 @@ describe("analysis API", () => {
                 .query({ userId: "some-user-id" });
 
             expect(response.statusCode).toBe(200);
-            expect(findMock).toBeCalledWith({ user: "some-user-id" });
+            expect(findMeasurement).toBeCalledWith({ user: "some-user-id" });
+            expect(response.body[0].value).toEqual("Analysis1")
             expect(verifyToken).toBeCalledWith('some-token', expect.anything());
         });
 
-        // Add more test cases for different scenarios (e.g., no userId, no analyses found, database error)
+        it("Should return zero analyses if no measurements exist for userId", async () => {
+            const findMeasurement = jest.spyOn(Measurement, "find").mockImplementation(async () => []);
+
+            verifyToken.mockImplementation(async () => Promise.resolve(null));
+
+            const response = await request(app)
+                .get("/api/v1/Analysis")
+                .set('x-auth-token', 'some-token')
+                .query({ userId: "some-nonexistent-user-id" });
+
+            expect(response.statusCode).toBe(404);
+            expect(findMeasurement).toBeCalledWith({ user: "some-nonexistent-user-id" });
+            expect(verifyToken).toBeCalledWith('some-token', expect.anything());
+            expect(response.body.message).toBe('No analyses found for the given userId');
+        });
+
+
+        it("Should return zero analyses if no analyses exist for userId", async () => {
+            const findMeasurement = jest.spyOn(Measurement, "find").mockImplementation(async () => [
+                new Measurement({ "id": "meas1", "title": "myTitle", "date": "01/01/01", "comment": "fdsfdsf", "type": "https://www.testassurance.com", "user": "some-user-id" })
+            ]);
+            const findMock = jest.spyOn(Analysis, "find").mockImplementation(async () => []);
+
+            verifyToken.mockImplementation(async () => Promise.resolve(null));
+
+            const response = await request(app)
+                .get("/api/v1/Analysis")
+                .set('x-auth-token', 'some-token')
+                .query({ userId: "some-nonexistent-user-id" });
+
+            expect(response.statusCode).toBe(404);
+            expect(findMeasurement).toBeCalledWith({ user: "some-nonexistent-user-id" });
+            expect(findMock).toBeCalled()
+            expect(verifyToken).toBeCalledWith('some-token', expect.anything());
+            expect(response.body.message).toBe('No analyses found for the given userId');
+        });
     });
 });
