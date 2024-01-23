@@ -5,7 +5,7 @@ const verifyToken = require('../verifyJWTToken');
 const mongoose = require('mongoose');
 
 
-jest.mock('../verifyJWTToken'); // Mock the entire module
+jest.mock('../verifyJWTToken'); 
 
 describe("analysis API", () => {
     describe("GET /analysis/:id", () => {
