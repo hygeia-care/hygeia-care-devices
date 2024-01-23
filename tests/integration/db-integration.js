@@ -1,7 +1,7 @@
 const Analysis = require('../../models/analysis')
 const dbConnect = require('../../db')
 
-jest.setTimeout(30000); 
+jest.setTimeout(10000); 
 
 describe('Analysis DB connection', () => {
     beforeAll((done) => {
