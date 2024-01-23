@@ -3,20 +3,13 @@ const app = require('../app');
 const request = require('supertest');
 const verifyToken = require('../verifyJWTToken');
 const mongoose = require('mongoose');
-const { connectDatabase, closeDatabase } = require('./dbConnection'); // Adjust the path accordingly
+const { connectDatabase, closeDatabase } = require('./setup'); // Adjust the path accordingly
 
 jest.mock('../verifyJWTToken');
 
 describe("measurement API", () => {
 
     describe("GET /measurement/:id", () => {
-
-        beforeAll(async () => {
-            // Connect to the database before all tests
-            await connectDatabase();
-        });
-    
-
         const measurement = [
             new Measurement({ "id": "123456789", "title": "myTitle", "date": "01/01/01", "comment": "fdsfdsf", "type": "https://www.testassurance.com", "user": "me" }),
         ];
@@ -25,11 +18,6 @@ describe("measurement API", () => {
         beforeEach(() => {
             dbFind = jest.spyOn(Measurement, "find");
             verifyToken.mockReset();
-        });
-
-        afterAll(async () => {
-            // Close the database connection after all tests
-            await closeDatabase();
         });
 
         it("Should return one measurement", () => {
