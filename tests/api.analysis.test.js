@@ -13,12 +13,11 @@ describe("analysis API", () => {
     });
 
     describe("GET /analysis/:id", () => {
-        const analysis = [new Analysis({ "value": "Testanalysis", "measurement": "meas34Rmnt_2024_XYZ" })];
-        var dbFind;
-        dbFind = jest.spyOn(Analysis, "find");
-
-
+        
         it("Should return the analysis", () => {
+            const analysis = [new Analysis({ "value": "Testanalysis", "measurement": "meas34Rmnt_2024_XYZ" })];
+            var dbFind;
+            dbFind = jest.spyOn(Analysis, "find");
             dbFind.mockImplementation(async () => Promise.resolve(analysis));
             verifyToken.mockImplementation(async () => Promise.resolve(null));
 
@@ -28,6 +27,37 @@ describe("analysis API", () => {
                 expect(dbFind).toBeCalled();
                 expect(verifyToken).toBeCalled();
             });
+        });
+
+        it("Should return 404 if analysis by ID not found", async () => {
+            const findMock = jest.spyOn(Analysis, "find").mockImplementation(async () => []);
+    
+            verifyToken.mockImplementation(async () => Promise.resolve(null));
+    
+            const response = await request(app)
+                .get("/api/v1/Analysis/nonexistent-id")
+                .set('x-auth-token', 'some-token');
+    
+            expect(response.statusCode).toBe(404);
+            expect(findMock).toBeCalledWith({ _id: "nonexistent-id" });
+            expect(verifyToken).toBeCalledWith('some-token', expect.anything());
+            expect(response.body.message).toBe('No analyses found with the given id');
+        });
+
+        it("Should return 500 on database error for analysis by ID", async () => {
+            const findMock = jest.spyOn(Analysis, "find").mockImplementation(async () => {
+                throw new Error("Database error");
+            });
+    
+            verifyToken.mockImplementation(async () => Promise.resolve(null));
+    
+            const response = await request(app)
+                .get("/api/v1/Analysis/some-id")
+                .set('x-auth-token', 'some-token');
+    
+            expect(response.statusCode).toBe(500);
+            expect(findMock).toBeCalledWith({ _id: "some-id" });
+            expect(verifyToken).toBeCalledWith('some-token', expect.anything());
         });
     });
 
