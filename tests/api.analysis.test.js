@@ -3,6 +3,7 @@ const request = require('supertest');
 const Analysis = require('../models/analysis');
 const verifyToken = require('../verifyJWTToken');
 const mongoose = require('mongoose');
+const { connectDatabase, closeDatabase } = require('./dbConnection'); // Adjust the path accordingly
 
 
 jest.mock('../verifyJWTToken'); 
@@ -12,6 +13,11 @@ describe("analysis API", () => {
         const analysis = [new Analysis({"value":"Testanalysis", "measurement":"meas34Rmnt_2024_XYZ"})];
         var dbFind;
 
+        beforeAll(async () => {
+            // Connect to the database before all tests
+            await connectDatabase();
+        });
+        
         beforeEach(() => {
             dbFind = jest.spyOn(Analysis, "find");
             // Reset the mock before each test
@@ -19,8 +25,8 @@ describe("analysis API", () => {
         });
 
         afterAll(async () => {
-            // Close MongoDB connection after all tests
-            await mongoose.connection.close();
+            // Close the database connection after all tests
+            await closeDatabase();
         });
 
         it("Should return all analysis", () => {
