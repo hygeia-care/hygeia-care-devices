@@ -2,6 +2,8 @@
 
 This repo contains the code for running the microservice for medical devices in the context of the hygena app.
 
+The "Medical Devices" microservice is responsible for the integration and management of medical devices. This microservice provides functionalities such as connecting medical devices to the platform, storing and processing data collected from these devices, and making this data available for use in diagnostics and treatment. It also facilitates interoperability between different devices and systems, ensuring that information is accessible and usable in an effective way for medical professionals.
+
 ## Running from a docker container
 
 A docker image can be built from the exisitng docker file. Running the resulting image will run the medical devices on the port defined in the Dockerfile. 
