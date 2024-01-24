@@ -4,6 +4,8 @@ This repo contains the code for running the microservice for medical devices in 
 
 The "Medical Devices" microservice is responsible for the integration and management of medical devices. This microservice provides functionalities such as connecting medical devices to the platform, storing and processing data collected from these devices, and making this data available for use in diagnostics and treatment. It also facilitates interoperability between different devices and systems, ensuring that information is accessible and usable in an effective way for medical professionals.
 
+Finally, it offers an easy way to export a device's measurements and a doctor's associated comments in the standardized Fast Healthcare Interoperability Resources (FHIR R4) format. This way, patient information can be exported uniformly and further analyzed by external tools or for medical research.
+
 ## Running from a docker container
 
 A docker image can be built from the exisitng docker file. Running the resulting image will run the medical devices on the port defined in the Dockerfile. 
